@@ -76,77 +76,118 @@ class DestinationController extends Controller
     /**
      * Display the specified destination.
      */
-    public function show($id)
+    public function show($name)
     {
-        $destinationModel = Destination::where('active', true)->findOrFail($id);
-
-        // Debug the raw data
-        \Log::info('Raw destination data:', [
-            'highlights' => $destinationModel->highlights,
-            'activities' => $destinationModel->activities,
-            'included' => $destinationModel->included,
-            'not_included' => $destinationModel->not_included
-        ]);
-
-        // Convert to array format that the view expects
-        $destination = [
-            'id' => $destinationModel->id,
-            'name' => $destinationModel->name,
-            'description' => $destinationModel->description,
-            'price' => $destinationModel->price,
-            'original_price' => $destinationModel->original_price,
-            'type' => $destinationModel->type,
-            'duration' => $destinationModel->duration ?: '3 dni',
-            'rating' => $destinationModel->rating,
-            'activities' => json_decode($destinationModel->activities, true) ?: [],
-            'highlights' => json_decode($destinationModel->highlights, true) ?: [],
-            'image' => $destinationModel->image,
-            'category' => $destinationModel->category,
-            'region' => $destinationModel->region,
-            'city' => $destinationModel->city,
-            'active' => $destinationModel->active,
-            'max_people' => 50, // Default value since column doesn't exist
-            'min_age' => 0,     // Default value since column doesn't exist
-            'included' => is_string($destinationModel->included) ? json_decode($destinationModel->included, true) ?: [] : ($destinationModel->included ?: []),
-            'not_included' => is_string($destinationModel->not_included) ? json_decode($destinationModel->not_included, true) ?: [] : ($destinationModel->not_included ?: []),
-            'itinerary' => 'Program wycieczki dostępny po rezerwacji.',           // Default value since column doesn't exist
-            'what_to_bring' => 'Wygodne buty, ubrania dostosowane do pogody.',   // Default value since column doesn't exist
-            'cancellation_policy' => 'Bezpłatne anulowanie do 24h przed rozpoczęciem.' // Default value since column doesn't exist
+        $destinations = [
+            'warszawa' => [
+                'name' => 'Warszawa',
+                'icon' => '🏛️',
+                'description' => 'Stolica Polski - nowoczesna metropolia z bogatą historią',
+                'rating' => '4.8',
+                'distance' => '0 km',
+                'population' => '1.8M',
+                'temperature' => '15°C',
+                'about' => 'Warszawa to dynamiczna stolica Polski, która łączy nowoczesność z tradycją. Miasto pełne jest zabytków, muzeów, parków i nowoczesnych budynków.',
+                'history' => 'Założona w XIII wieku, Warszawa stała się stolicą Polski w 1596 roku. Miasto zostało niemal całkowicie zniszczone podczas II wojny światowej, ale zostało odbudowane z dbałością o historyczne detale.',
+                'attractions' => [
+                    ['icon' => '🏰', 'name' => 'Zamek Królewski', 'description' => 'Historyczna siedziba królów Polski'],
+                    ['icon' => '🌳', 'name' => 'Łazienki Królewskie', 'description' => 'Piękny park z pałacem na wodzie'],
+                    ['icon' => '🏛️', 'name' => 'Muzeum Powstania Warszawskiego', 'description' => 'Interaktywne muzeum historii'],
+                    ['icon' => '🌆', 'name' => 'Pałac Kultury i Nauki', 'description' => 'Symbol Warszawy i najwyższy budynek'],
+                    ['icon' => '🎭', 'name' => 'Teatr Wielki', 'description' => 'Narodowa opera i balet']
+                ],
+                'cuisine' => 'Warszawa oferuje szeroką gamę kuchni - od tradycyjnej polskiej po międzynarodową. Znajdziesz tu zarówno eleganckie restauracje, jak i przytulne kawiarnie.',
+                'specialties' => 'Pierogi, żurek, bigos, pączki, sernik warszawski',
+                'pricing' => [
+                    ['type' => 'Pociąg', 'price' => '45zł', 'details' => 'PKP Intercity'],
+                    ['type' => 'Autobus', 'price' => '35zł', 'details' => 'FlixBus'],
+                    ['type' => 'Samolot', 'price' => '120zł', 'details' => 'LOT']
+                ]
+            ],
+            'krakow' => [
+                'name' => 'Kraków',
+                'icon' => '🐉',
+                'description' => 'Królewskie miasto - perła polskiej architektury',
+                'rating' => '4.9',
+                'distance' => '300 km',
+                'population' => '780k',
+                'temperature' => '14°C',
+                'about' => 'Kraków to jedno z najpiękniejszych miast Polski, pełne zabytków, legend i magicznej atmosfery. Była stolica Polski zachwyca swoją architekturą.',
+                'history' => 'Kraków był stolicą Polski przez ponad 500 lat. Miasto uniknęło zniszczeń podczas II wojny światowej, dzięki czemu zachowało swój średniowieczny charakter.',
+                'attractions' => [
+                    ['icon' => '🏰', 'name' => 'Wawel', 'description' => 'Zamek królewski i katedra'],
+                    ['icon' => '🏛️', 'name' => 'Rynek Główny', 'description' => 'Największy średniowieczny rynek w Europie'],
+                    ['icon' => '⛪', 'name' => 'Kościół Mariacki', 'description' => 'Słynny kościół z hejnałem'],
+                    ['icon' => '🏛️', 'name' => 'Sukiennice', 'description' => 'Historyczne hale targowe'],
+                    ['icon' => '🌳', 'name' => 'Planty', 'description' => 'Park wokół Starego Miasta']
+                ],
+                'cuisine' => 'Kraków słynie z tradycyjnej kuchni polskiej. Znajdziesz tu autentyczne pierogi, żurek, bigos i inne regionalne specjały.',
+                'specialties' => 'Obwarzanek krakowski, maczanka krakowska, kremówka papieska',
+                'pricing' => [
+                    ['type' => 'Pociąg', 'price' => '45zł', 'details' => 'PKP Intercity'],
+                    ['type' => 'Autobus', 'price' => '35zł', 'details' => 'FlixBus'],
+                    ['type' => 'Samolot', 'price' => '150zł', 'details' => 'LOT']
+                ]
+            ],
+            'gdansk' => [
+                'name' => 'Gdańsk',
+                'icon' => '⚓',
+                'description' => 'Nadmorska perła - miasto bursztynu i historii',
+                'rating' => '4.7',
+                'distance' => '340 km',
+                'population' => '470k',
+                'temperature' => '12°C',
+                'about' => 'Gdańsk to piękne nadmorskie miasto z bogatą historią hanzeatycką. Miasto bursztynu i Solidarności zachwyca swoją architekturą i atmosferą.',
+                'history' => 'Gdańsk ma ponad 1000-letnią historię. Był ważnym miastem hanzeatyckim i miejscem wybuchu II wojny światowej oraz narodzin Solidarności.',
+                'attractions' => [
+                    ['icon' => '🏛️', 'name' => 'Długi Targ', 'description' => 'Główna ulica Starego Miasta'],
+                    ['icon' => '⚓', 'name' => 'Żuraw', 'description' => 'Symbol Gdańska - średniowieczny dźwig'],
+                    ['icon' => '🏛️', 'name' => 'Ratusz Głównego Miasta', 'description' => 'Piękny ratusz z wieżą'],
+                    ['icon' => '⛪', 'name' => 'Bazylika Mariacka', 'description' => 'Największy ceglany kościół na świecie'],
+                    ['icon' => '🏭', 'name' => 'Stocznia Gdańska', 'description' => 'Miejsce narodzin Solidarności']
+                ],
+                'cuisine' => 'Gdańsk oferuje wyśmienitą kuchnię z akcentem na ryby i owoce morza. Znajdziesz tu tradycyjne dania pomorskie.',
+                'specialties' => 'Ryba po gdańsku, pierogi z rybą, flaki gdańskie, bursztyn',
+                'pricing' => [
+                    ['type' => 'Pociąg', 'price' => '55zł', 'details' => 'PKP Intercity'],
+                    ['type' => 'Autobus', 'price' => '40zł', 'details' => 'FlixBus'],
+                    ['type' => 'Samolot', 'price' => '180zł', 'details' => 'LOT']
+                ]
+            ],
+            'wroclaw' => [
+                'name' => 'Wrocław',
+                'icon' => '🧚',
+                'description' => 'Miasto krasnali - wrocławska magia',
+                'rating' => '4.6',
+                'distance' => '350 km',
+                'population' => '640k',
+                'temperature' => '13°C',
+                'about' => 'Wrocław to urocze miasto na 12 wyspach, połączonych ponad 100 mostami. Miasto krasnali zachwyca swoją architekturą i atmosferą.',
+                'history' => 'Wrocław ma bogatą historię sięgającą X wieku. Był stolicą Śląska i ważnym ośrodkiem handlowym. Po II wojnie światowej został włączony do Polski.',
+                'attractions' => [
+                    ['icon' => '🏛️', 'name' => 'Rynek', 'description' => 'Piękny rynek z ratuszem'],
+                    ['icon' => '🧚', 'name' => 'Krasnale', 'description' => 'Ponad 600 krasnali w całym mieście'],
+                    ['icon' => '⛪', 'name' => 'Katedra św. Jana', 'description' => 'Gotycka katedra na Ostrowie Tumskim'],
+                    ['icon' => '🌳', 'name' => 'Ogród Japoński', 'description' => 'Piękny ogród w stylu japońskim'],
+                    ['icon' => '🏛️', 'name' => 'Hala Stulecia', 'description' => 'UNESCO - modernistyczna hala']
+                ],
+                'cuisine' => 'Wrocław oferuje różnorodną kuchnię z wpływami śląskimi, niemieckimi i polskimi. Znajdziesz tu wyśmienite restauracje i kawiarnie.',
+                'specialties' => 'Kiełbasa śląska, kluski śląskie, makówki, wrocławskie pierogi',
+                'pricing' => [
+                    ['type' => 'Pociąg', 'price' => '50zł', 'details' => 'PKP Intercity'],
+                    ['type' => 'Autobus', 'price' => '38zł', 'details' => 'FlixBus'],
+                    ['type' => 'Samolot', 'price' => '160zł', 'details' => 'LOT']
+                ]
+            ]
         ];
 
-        // Debug the processed data
-        \Log::info('Processed destination data:', [
-            'highlights' => $destination['highlights'],
-            'activities' => $destination['activities'],
-            'included' => $destination['included'],
-            'not_included' => $destination['not_included']
-        ]);
+        $destination = $destinations[$name] ?? null;
+        
+        if (!$destination) {
+            abort(404, 'Destynacja nie została znaleziona');
+        }
 
-        // Get related destinations (same region or category)
-        $relatedDestinations = Destination::where('active', true)
-                                          ->where('id', '!=', $id)
-                                          ->where(function($query) use ($destinationModel) {
-                                              $query->where('region', $destinationModel->region)
-                                                    ->orWhere('category', $destinationModel->category);
-                                          })
-                                          ->limit(3)
-                                          ->get();
-
-        // Convert related destinations to array format
-        $similarDestinations = $relatedDestinations->map(function($dest) {
-            return [
-                'id' => $dest->id,
-                'name' => $dest->name,
-                'description' => $dest->description,
-                'price' => $dest->price,
-                'type' => $dest->type,
-                'duration' => $dest->duration ?: '3 dni',
-                'rating' => $dest->rating,
-                'image' => $dest->image
-            ];
-        })->toArray();
-
-        return view('destinations.show', compact('destination', 'similarDestinations'));
+        return view('destinations.show', compact('destination'));
     }
 
     /**

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
+use Livewire\Attributes\Middleware;
 use Livewire\Component;
 
 #[Layout('components.layouts.auth')]
@@ -22,6 +23,15 @@ class Login extends Component
     public string $password = '';
 
     public bool $remember = false;
+
+    public function mount(): void
+    {
+        // Redirect if already authenticated
+        if (Auth::check()) {
+            $this->redirect(route('home', absolute: false), navigate: true);
+            return;
+        }
+    }
 
     /**
      * Handle an incoming authentication request.
@@ -43,7 +53,7 @@ class Login extends Component
         RateLimiter::clear($this->throttleKey());
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirect(route('home', absolute: false), navigate: true);
     }
 
     /**

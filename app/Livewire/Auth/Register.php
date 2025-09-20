@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Middleware;
 use Livewire\Component;
 
 #[Layout('components.layouts.auth')]
@@ -20,6 +21,15 @@ class Register extends Component
     public string $password = '';
 
     public string $password_confirmation = '';
+
+    public function mount(): void
+    {
+        // Redirect if already authenticated
+        if (Auth::check()) {
+            $this->redirect(route('home', absolute: false), navigate: true);
+            return;
+        }
+    }
 
     /**
      * Handle an incoming registration request.
@@ -38,6 +48,6 @@ class Register extends Component
 
         Auth::login($user);
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        $this->redirect(route('home', absolute: false), navigate: true);
     }
 }

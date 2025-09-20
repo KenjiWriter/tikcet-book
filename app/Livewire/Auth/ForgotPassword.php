@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Middleware;
 use Livewire\Component;
 
 #[Layout('components.layouts.auth')]
