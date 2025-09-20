@@ -14,9 +14,22 @@ use Illuminate\Support\Facades\Route;
 // GŁÓWNA STRONA - HOME zamiast welcome
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Auth status endpoint
+Route::get('/auth/status', function() {
+    return response()->json([
+        'authenticated' => auth()->check(),
+        'user' => auth()->user() ? [
+            'id' => auth()->user()->id,
+            'name' => auth()->user()->name,
+            'email' => auth()->user()->email,
+            'avatar' => auth()->user()->avatar ?? '👤'
+        ] : null
+    ]);
+})->name('auth.status');
+
 // Destynacje
 Route::get('/destinations', [DestinationController::class, 'index'])->name('destinations.index');
-Route::get('/destinations/{id}', [DestinationController::class, 'show'])->name('destinations.show');
+Route::get('/destinations/{name}', [DestinationController::class, 'show'])->name('destinations.show');
 
 // Atrakcje
 Route::get('/attractions', [AttractionController::class, 'index'])->name('attractions.index');
@@ -34,6 +47,43 @@ Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('book
 Route::get('/booking/{booking}', [BookingController::class, 'show'])->name('booking.show');
 Route::post('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 
+// Auth routes - using Livewire components
+Route::get('login', App\Livewire\Auth\Login::class)->name('login');
+Route::get('register', App\Livewire\Auth\Register::class)->name('register');
+Route::get('forgot-password', App\Livewire\Auth\ForgotPassword::class)->name('password.request');
+Route::get('reset-password/{token}', App\Livewire\Auth\ResetPassword::class)->name('password.reset');
+
+Route::middleware('auth')->group(function () {
+    Route::get('verify-email', App\Livewire\Auth\VerifyEmail::class)
+        ->name('verification.notice');
+
+    Route::get('verify-email/{id}/{hash}', App\Http\Controllers\Auth\VerifyEmailController::class)
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+
+    Route::get('confirm-password', App\Livewire\Auth\ConfirmPassword::class)
+        ->name('password.confirm');
+});
+
+Route::post('logout', App\Livewire\Actions\Logout::class)
+    ->name('logout');
+
+// Social Auth routes
+Route::get('/auth/google', [App\Http\Controllers\SocialAuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [App\Http\Controllers\SocialAuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+Route::get('/auth/apple', [App\Http\Controllers\SocialAuthController::class, 'redirectToApple'])->name('auth.apple');
+Route::get('/auth/apple/callback', [App\Http\Controllers\SocialAuthController::class, 'handleAppleCallback'])->name('auth.apple.callback');
+
+Route::get('/auth/facebook', [App\Http\Controllers\SocialAuthController::class, 'redirectToFacebook'])->name('auth.facebook');
+Route::get('/auth/facebook/callback', [App\Http\Controllers\SocialAuthController::class, 'handleFacebookCallback'])->name('auth.facebook.callback');
+
+Route::get('/auth/twitter', [App\Http\Controllers\SocialAuthController::class, 'redirectToTwitter'])->name('auth.twitter');
+Route::get('/auth/twitter/callback', [App\Http\Controllers\SocialAuthController::class, 'handleTwitterCallback'])->name('auth.twitter.callback');
+
+Route::get('/auth/github', [App\Http\Controllers\SocialAuthController::class, 'redirectToGitHub'])->name('auth.github');
+Route::get('/auth/github/callback', [App\Http\Controllers\SocialAuthController::class, 'handleGitHubCallback'])->name('auth.github.callback');
+
 // Statyczne strony
 Route::view('/about', 'about')->name('about');
 
@@ -41,9 +91,7 @@ Route::view('/about', 'about')->name('about');
 Route::get('/contact', function() { return view('contact.index'); })->name('contact.index');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+// Dashboard route removed - using home page instead
 
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
